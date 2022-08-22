@@ -19,31 +19,27 @@ import {
 } from '@devexpress/dx-react-scheduler-material-ui';
 import { Paper } from '@mui/material';
 import { useClasses, useMe, usePostClasses } from '../api/queries';
-import { useMutation } from '@tanstack/react-query';
 
 const currentDate = '2022-08-2';
-export default function ClassSchedule() {
-  const { data, isSuccess } = useClasses();
-  const { data: user } = useMe();
-  console.log(user);
 
+export default function ClassSchedule() {
+  const { data: classes } = useClasses();
+  const { data: user } = useMe();
   const mutation = usePostClasses();
-  const onClick = () => {
+
+  const commitChanges = ({ added, changed, deleted }) => {
     mutation.mutate({
-      name: 'Judo2',
-      startDate: '2022-08-22T13:17:53.606Z',
-      endDate: '2022-08-22T13:47:53.606Z',
-      maximumParticipants: 25,
+      name: added.title,
+      startDate: added.startDate,
+      endDate: added.endDate,
+      maximumParticipants: added.maximumParticipants,
       placeId: 1,
     });
   };
 
-  const commitChanges = ({ added, changed, deleted }) => {
-    let a = 2;
-  };
   return (
     <Paper>
-      <Scheduler data={data} height={660}>
+      <Scheduler data={classes} height={660}>
         <ViewState
           defaultCurrentDate={currentDate}
           defaultCurrentViewName="Week"
@@ -56,13 +52,55 @@ export default function ClassSchedule() {
         <TodayButton />
         <ViewSwitcher />
         <EditingState onCommitChanges={commitChanges} />
-        {/* <IntegratedEditing /> */}
         <Appointments />
         <AppointmentTooltip showCloseButton showOpenButton />
-        {user && user.roles.some((role) => role.value === 'ADMIN') && (
-          <AppointmentForm />
+        {user && user.roles.some(role => role.value === 'ADMIN') && (
+          <AppointmentForm
+            basicLayoutComponent={BasicLayout}
+            booleanEditorComponent={BoolEditor}
+            textEditorComponent={TextEditor}
+          />
         )}
       </Scheduler>
     </Paper>
   );
 }
+
+const BoolEditor = props => {
+  return null;
+};
+
+const TextEditor = props => {
+  if (props.type === 'multilineTextEditor') {
+    return null;
+  }
+  return <AppointmentForm.TextEditor {...props} />;
+};
+
+const BasicLayout = ({ onFieldChange, appointmentData, ...restProps }) => {
+  const onMaxParticipantsChange = nextValue => {
+    onFieldChange({ maximumParticipants: parseInt(nextValue) });
+  };
+  const onDescriptionChange = nextValue => {
+    onFieldChange({ description: nextValue });
+  };
+  return (
+    <AppointmentForm.BasicLayout
+      appointmentData={appointmentData}
+      onFieldChange={onFieldChange}
+      {...restProps}
+    >
+      <AppointmentForm.TextEditor
+        value={appointmentData.description}
+        onValueChange={onDescriptionChange}
+        placeholder="Description"
+      />
+      <AppointmentForm.TextEditor
+        value={appointmentData.maximumParticipants}
+        onValueChange={onMaxParticipantsChange}
+        placeholder="Maximum participants"
+        type="numberEditor"
+      />
+    </AppointmentForm.BasicLayout>
+  );
+};
