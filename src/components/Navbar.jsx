@@ -19,6 +19,8 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import Main from './Main';
 import { useNavigate } from 'react-router-dom';
 import { pageRoutes } from '../routes';
+import { useQueryClient } from '@tanstack/react-query';
+import { logout } from '../api/queries';
 
 const drawerWidth = 240;
 
@@ -26,6 +28,7 @@ export default function ResponsiveDrawer(props) {
   const { window, children } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -42,12 +45,21 @@ export default function ResponsiveDrawer(props) {
           { text: 'Send email', page: '' },
           { text: 'My account', page: pageRoutes.main },
         ].map((obj, index) => (
-          <ListItem key={obj.navigatetext} disablePadding>
+          <ListItem key={obj.text} disablePadding>
             <ListItemButton onClick={() => navigate(obj.page)}>
               <ListItemText primary={obj.text} />
             </ListItemButton>
           </ListItem>
         ))}
+        <ListItem key={'logout'} disablePadding>
+          <ListItemButton
+            onClick={() => {
+              logout().then(() => queryClient.invalidateQueries());
+            }}
+          >
+            <ListItemText primary={'Logout'} />
+          </ListItemButton>
+        </ListItem>
       </List>
     </div>
   );

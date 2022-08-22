@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useMe } from '../api/auth';
+import { useMe } from '../api/queries';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import { pageRoutes } from '../routes';
 import { toast } from 'react-toastify';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@mui/material';
+import { api } from '../utils/api';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -22,16 +23,24 @@ const Auth = () => {
     }
   }, [user, isError]);
 
-  const onSubmit = async event => {
+  const onSubmit2 = async (event) => {
+    event.preventDefault();
+    api.get('http://localhost:5001/auth/me');
+  };
+  const onSubmit = async (event) => {
     event.preventDefault();
     setBtnLoading(true);
     try {
+      api.post('http://localhost:5001/auth/login', {
+        email,
+        password,
+      });
       //const resp = await getTokenByPassword(email, password);
       //const resp = await api.get(
       //'https://github.com/login/oauth/authorize?client_id=f7eae16f4bf63f8a2736&redirect_uri=http://localhost:4000/github?scope=user:email'
       //);
-      window.location.href =
-        'https://github.com/login/oauth/authorize?client_id=f7eae16f4bf63f8a2736&redirect_uri=http://localhost:4000/github?scope=user:email';
+      // window.location.href =
+      //   'https://github.com/login/oauth/authorize?client_id=f7eae16f4bf63f8a2736&redirect_uri=http://localhost:4000/github?scope=user:email';
 
       if (false) {
         Cookies.set('access', true);
@@ -63,51 +72,61 @@ const Auth = () => {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  // if (isLoading) return <div>Loading...</div>;
 
   return (
-    <form onSubmit={onSubmit} className="col-lg-6 offset-lg-3 ">
-      <Link
-        href={
-          'https://github.com/login/oauth/authorize?client_id=f7eae16f4bf63f8a2736&redirect_uri=http://localhost:4000/github?scope=user:email'
-        }
-      >
-        <span>Sign in with GitHub</span>
-      </Link>
-      <div className="row justify-content-center">
-        <h1 id="login-message" className="mb-5">
-          Zaloguj się
-        </h1>
-        <label htmlFor="email">
-          Email:
-          <input
-            id="input-email"
-            type="email"
-            onChange={e => {
-              setEmail(e.target.value);
-            }}
-            className="form-control"
-          />
-        </label>
-        <label htmlFor="password">
-          Password:
-          <input
-            id="input-pass"
-            type="password"
-            onChange={e => {
-              setPassword(e.target.value);
-            }}
-            className="form-control"
-          />
-        </label>
+    <div>
+      <form onSubmit={onSubmit2} className="col-lg-6 offset-lg-3 ">
         <input
           type="submit"
           value="Submit"
           className="btn btn-primary form-control"
           disabled={btnLoading}
         />
-      </div>
-    </form>
+      </form>
+      <form onSubmit={onSubmit} className="col-lg-6 offset-lg-3 ">
+        <Link
+          href={
+            'https://github.com/login/oauth/authorize?client_id=f7eae16f4bf63f8a2736&redirect_uri=http://localhost:4000/github?scope=user:email'
+          }
+        >
+          <span>Sign in with GitHub</span>
+        </Link>
+        <div className="row justify-content-center">
+          <h1 id="login-message" className="mb-5">
+            Zaloguj się
+          </h1>
+          <label htmlFor="email">
+            Email:
+            <input
+              id="input-email"
+              type="email"
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+              className="form-control"
+            />
+          </label>
+          <label htmlFor="password">
+            Password:
+            <input
+              id="input-pass"
+              type="password"
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              className="form-control"
+            />
+          </label>
+          <input
+            type="submit"
+            value="Submit"
+            className="btn btn-primary form-control"
+            disabled={btnLoading}
+          />
+        </div>
+      </form>
+    </div>
   );
 };
 

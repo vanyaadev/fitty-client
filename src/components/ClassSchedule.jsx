@@ -1,34 +1,67 @@
 import * as React from 'react';
-import { ViewState } from '@devexpress/dx-react-scheduler';
+import {
+  EditingState,
+  IntegratedEditing,
+  ViewState,
+} from '@devexpress/dx-react-scheduler';
 import {
   Scheduler,
-  DayView,
+  WeekView,
   Appointments,
+  AppointmentTooltip,
+  AppointmentForm,
+  Toolbar,
+  DateNavigator,
+  TodayButton,
+  DayView,
+  MonthView,
+  ViewSwitcher,
 } from '@devexpress/dx-react-scheduler-material-ui';
 import { Paper } from '@mui/material';
+import { useClasses, useMe, usePostClasses } from '../api/queries';
+import { useMutation } from '@tanstack/react-query';
 
-const currentDate = '2018-11-01';
-const schedulerData = [
-  {
-    startDate: '2018-11-01T09:45',
-    endDate: '2018-11-01T11:00',
-    title: 'Meeting',
-  },
-  {
-    startDate: '2018-11-01T12:00',
-    endDate: '2018-11-01T13:30',
-    title: 'Go to a gym',
-  },
-];
-
+const currentDate = '2022-08-2';
 export default function ClassSchedule() {
-  console.log('here');
+  const { data, isSuccess } = useClasses();
+  const { data: user } = useMe();
+  console.log(user);
+
+  const mutation = usePostClasses();
+  const onClick = () => {
+    mutation.mutate({
+      name: 'Judo2',
+      startDate: '2022-08-22T13:17:53.606Z',
+      endDate: '2022-08-22T13:47:53.606Z',
+      maximumParticipants: 25,
+      placeId: 1,
+    });
+  };
+
+  const commitChanges = ({ added, changed, deleted }) => {
+    let a = 2;
+  };
   return (
-    <Paper sx={{ marginTop: '5px' }}>
-      <Scheduler data={schedulerData}>
-        <ViewState currentDate={currentDate} />
-        <DayView startDayHour={9} endDayHour={14} />
+    <Paper>
+      <Scheduler data={data} height={660}>
+        <ViewState
+          defaultCurrentDate={currentDate}
+          defaultCurrentViewName="Week"
+        />
+        <DayView startDayHour={9} endDayHour={18} />
+        <WeekView startDayHour={10} endDayHour={19} />
+        <MonthView />
+        <Toolbar />
+        <DateNavigator />
+        <TodayButton />
+        <ViewSwitcher />
+        <EditingState onCommitChanges={commitChanges} />
+        {/* <IntegratedEditing /> */}
         <Appointments />
+        <AppointmentTooltip showCloseButton showOpenButton />
+        {user && user.roles.some((role) => role.value === 'ADMIN') && (
+          <AppointmentForm />
+        )}
       </Scheduler>
     </Paper>
   );

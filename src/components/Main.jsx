@@ -2,7 +2,7 @@ import React, { Component, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { pageRoutes } from '../routes';
 import Cookies from 'js-cookie';
-import { useMe } from '../api/auth';
+import { useMe } from '../api/queries';
 
 export default function Main() {
   const navigate = useNavigate();

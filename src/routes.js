@@ -1,7 +1,8 @@
 export const apiRoutes = {
-  me: '/me',
-  login: '/login',
-  logount: '/logout',
+  me: '/auth/me',
+  login: 'auth/login',
+  logout: 'auth/logout',
+  classes: '/classes',
 };
 
 export const pageRoutes = {

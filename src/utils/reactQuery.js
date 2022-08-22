@@ -1,12 +1,12 @@
 import { api } from './api';
-import { useQuery } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function fetcher({ queryKey, pageParam }) {
   const [url, params] = queryKey;
 
   return api
     .get(url, { params: { ...params, pageParam } })
-    .then(res => res.data);
+    .then((res) => res.data);
 }
 
 export const useFetch = (url, params, config) => {
@@ -20,4 +20,14 @@ export const useFetch = (url, params, config) => {
   );
 
   return context;
+};
+
+export const useGenericMutation = (func, url, params) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(func, {
+    onSuccess: () => {
+      queryClient.invalidateQueries([url, params]);
+    },
+  });
 };
