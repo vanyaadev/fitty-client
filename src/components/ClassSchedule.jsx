@@ -1,9 +1,5 @@
 import * as React from 'react';
-import {
-  EditingState,
-  IntegratedEditing,
-  ViewState,
-} from '@devexpress/dx-react-scheduler';
+import { EditingState, ViewState } from '@devexpress/dx-react-scheduler';
 import {
   Scheduler,
   WeekView,
@@ -16,30 +12,84 @@ import {
   DayView,
   MonthView,
   ViewSwitcher,
+  Resources,
 } from '@devexpress/dx-react-scheduler-material-ui';
 import { Paper } from '@mui/material';
-import { useClasses, useMe, usePostClasses } from '../api/queries';
+import {
+  useClasses,
+  useInstructors,
+  useMe,
+  usePostClasses,
+} from '../api/queries';
+import {
+  BasicLayout,
+  BoolEditor,
+  Content,
+  TextEditor,
+} from './ClassScheduleComponents';
 
-const currentDate = '2022-08-2';
+const currentDate = new Date();
 
 export default function ClassSchedule() {
   const { data: classes } = useClasses();
+  const { data: instructors } = useInstructors();
   const { data: user } = useMe();
   const mutation = usePostClasses();
 
-  const commitChanges = ({ added, changed, deleted }) => {
-    mutation.mutate({
-      name: added.title,
-      startDate: added.startDate,
-      endDate: added.endDate,
-      maximumParticipants: added.maximumParticipants,
-      placeId: 1,
-    });
+  const commitChanges = (props) => {
+    let a = 2;
+    // mutation.mutate({
+    //   name: added.title,
+    //   startDate: added.startDate,
+    //   endDate: added.endDate,
+    //   maximumParticipants: added.maximumParticipants,
+    //   placeId: 1,
+    // });
   };
+  const owners = [
+    {
+      text: 'Andrew Glover',
+      id: 1,
+      color: '#7E57C2',
+    },
+    {
+      text: 'Arnie Schwartz',
+      id: 2,
+      color: '#FF7043',
+    },
+    {
+      text: 'John Heart',
+      id: 3,
+      color: '#E91E63',
+    },
+    {
+      text: 'Taylor Riley',
+      id: 4,
+      color: '#E91E63',
+    },
+    {
+      text: 'Brad Farkus',
+      id: 5,
+      color: '#AB47BC',
+    },
+    {
+      text: 'Arthur Miller',
+      id: 6,
+      color: '#FFA726',
+    },
+  ];
+
+  const resources = [
+    {
+      fieldName: 'ownerId',
+      title: 'Owners',
+      instances: owners,
+    },
+  ];
 
   return (
     <Paper>
-      <Scheduler data={classes} height={660}>
+      <Scheduler data={classes} height={1000}>
         <ViewState
           defaultCurrentDate={currentDate}
           defaultCurrentViewName="Week"
@@ -53,8 +103,13 @@ export default function ClassSchedule() {
         <ViewSwitcher />
         <EditingState onCommitChanges={commitChanges} />
         <Appointments />
-        <AppointmentTooltip showCloseButton showOpenButton />
-        {user && user.roles.some(role => role.value === 'ADMIN') && (
+        <Resources data={resources} />
+        <AppointmentTooltip
+          showCloseButton
+          showOpenButton
+          contentComponent={Content}
+        />
+        {user && user.roles.some((role) => role.value === 'ADMIN') && (
           <AppointmentForm
             basicLayoutComponent={BasicLayout}
             booleanEditorComponent={BoolEditor}
@@ -65,42 +120,3 @@ export default function ClassSchedule() {
     </Paper>
   );
 }
-
-const BoolEditor = props => {
-  return null;
-};
-
-const TextEditor = props => {
-  if (props.type === 'multilineTextEditor') {
-    return null;
-  }
-  return <AppointmentForm.TextEditor {...props} />;
-};
-
-const BasicLayout = ({ onFieldChange, appointmentData, ...restProps }) => {
-  const onMaxParticipantsChange = nextValue => {
-    onFieldChange({ maximumParticipants: parseInt(nextValue) });
-  };
-  const onDescriptionChange = nextValue => {
-    onFieldChange({ description: nextValue });
-  };
-  return (
-    <AppointmentForm.BasicLayout
-      appointmentData={appointmentData}
-      onFieldChange={onFieldChange}
-      {...restProps}
-    >
-      <AppointmentForm.TextEditor
-        value={appointmentData.description}
-        onValueChange={onDescriptionChange}
-        placeholder="Description"
-      />
-      <AppointmentForm.TextEditor
-        value={appointmentData.maximumParticipants}
-        onValueChange={onMaxParticipantsChange}
-        placeholder="Maximum participants"
-        type="numberEditor"
-      />
-    </AppointmentForm.BasicLayout>
-  );
-};

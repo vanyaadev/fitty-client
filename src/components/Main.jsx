@@ -8,11 +8,11 @@ export default function Main() {
   const navigate = useNavigate();
   const { data: user, isError } = useMe();
 
-  useEffect(() => {
-    if (!user || isError) {
-      navigate(pageRoutes.auth);
-    }
-  }, [user, isError]);
+  // useEffect(() => {
+  //   if (!user || isError) {
+  //     navigate(pageRoutes.auth);
+  //   }
+  // }, [user, isError]);
 
   return <div>Main page</div>;
 }

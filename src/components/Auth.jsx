@@ -19,7 +19,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (user && !isError) {
-      navigate(pageRoutes.main);
+      navigate(pageRoutes.schedule);
     }
   }, [user, isError]);
 
@@ -31,16 +31,12 @@ const Auth = () => {
     event.preventDefault();
     setBtnLoading(true);
     try {
-      api.post('http://localhost:5001/auth/login', {
-        email,
-        password,
-      });
-      //const resp = await getTokenByPassword(email, password);
-      //const resp = await api.get(
-      //'https://github.com/login/oauth/authorize?client_id=f7eae16f4bf63f8a2736&redirect_uri=http://localhost:4000/github?scope=user:email'
-      //);
-      // window.location.href =
-      //   'https://github.com/login/oauth/authorize?client_id=f7eae16f4bf63f8a2736&redirect_uri=http://localhost:4000/github?scope=user:email';
+      api
+        .post('http://localhost:5001/auth/login', {
+          email,
+          password,
+        })
+        .then(() => queryClient.refetchQueries());
 
       if (false) {
         Cookies.set('access', true);
@@ -76,22 +72,7 @@ const Auth = () => {
 
   return (
     <div>
-      <form onSubmit={onSubmit2} className="col-lg-6 offset-lg-3 ">
-        <input
-          type="submit"
-          value="Submit"
-          className="btn btn-primary form-control"
-          disabled={btnLoading}
-        />
-      </form>
       <form onSubmit={onSubmit} className="col-lg-6 offset-lg-3 ">
-        <Link
-          href={
-            'https://github.com/login/oauth/authorize?client_id=f7eae16f4bf63f8a2736&redirect_uri=http://localhost:4000/github?scope=user:email'
-          }
-        >
-          <span>Sign in with GitHub</span>
-        </Link>
         <div className="row justify-content-center">
           <h1 id="login-message" className="mb-5">
             Zaloguj się

@@ -23,11 +23,24 @@ export const useClasses = () => {
   });
 };
 
+export const useInstructors = () => {
+  return useFetch(apiRoutes.instructors);
+};
+
 export const usePostClasses = () => {
   const queryClient = useQueryClient();
   return useMutation((data) => api.post(apiRoutes.classes, data), {
     onSuccess: () => {
       queryClient.invalidateQueries([apiRoutes.classes]);
+    },
+  });
+};
+
+export const useEnroll = () => {
+  const queryClient = useQueryClient();
+  return useMutation((data) => api.post(`${apiRoutes.enroll + data.userId}`), {
+    onSuccess: () => {
+      queryClient.invalidateQueries([apiRoutes.enroll]);
     },
   });
 };

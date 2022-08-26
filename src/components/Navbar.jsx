@@ -18,7 +18,7 @@ import Typography from '@mui/material/Typography';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Main from './Main';
 import { useNavigate } from 'react-router-dom';
-import { pageRoutes } from '../routes';
+import { apiRoutes, pageRoutes } from '../routes';
 import { useQueryClient } from '@tanstack/react-query';
 import { logout } from '../api/queries';
 
@@ -54,7 +54,7 @@ export default function ResponsiveDrawer(props) {
         <ListItem key={'logout'} disablePadding>
           <ListItemButton
             onClick={() => {
-              logout().then(() => queryClient.invalidateQueries());
+              logout().finally(() => queryClient.resetQueries());
             }}
           >
             <ListItemText primary={'Logout'} />
