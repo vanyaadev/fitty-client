@@ -56,10 +56,10 @@ export default function ClassSchedule() {
   };
 
   const onCurrentDateChange = (changedDate) => {
-    const currWeekStart = new Date();
-    currWeekStart.setHours(0, 0, 0, 0);
-    currWeekStart.setDate(currWeekStart.getDate() - currWeekStart.getDay());
-    if (changedDate >= currWeekStart) setCurrentDate(changedDate);
+    const viewStart = new Date();
+    viewStart.setHours(0, 0, 0, 0);
+    viewStart.setDate(viewStart.getDate() - viewStart.getDay());
+    if (changedDate >= viewStart) setCurrentDate(changedDate);
   };
 
   const onCurrentViewNameChange = (changedViewName) => {
