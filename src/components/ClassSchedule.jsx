@@ -1,5 +1,9 @@
 import * as React from 'react';
-import { EditingState, ViewState } from '@devexpress/dx-react-scheduler';
+import {
+  EditingState,
+  IntegratedEditing,
+  ViewState,
+} from '@devexpress/dx-react-scheduler';
 import {
   Scheduler,
   WeekView,
@@ -27,16 +31,20 @@ import {
   Content,
   TextEditor,
 } from './ClassScheduleComponents';
+import { useState } from 'react';
 
-const currentDate = new Date();
+let currentDate = new Date();
 
 export default function ClassSchedule() {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentViewName, setCurrentViewName] = useState('Week');
+
   const { data: classes } = useClasses();
   const { data: instructors } = useInstructors();
   const { data: user } = useMe();
   const mutation = usePostClasses();
-
-  const commitChanges = (props) => {
+  const commitChanges = ({ added, changed, deleted }) => {
+    console.log('abc');
     let a = 2;
     // mutation.mutate({
     //   name: added.title,
@@ -46,44 +54,23 @@ export default function ClassSchedule() {
     //   placeId: 1,
     // });
   };
-  const owners = [
-    {
-      text: 'Andrew Glover',
-      id: 1,
-      color: '#7E57C2',
-    },
-    {
-      text: 'Arnie Schwartz',
-      id: 2,
-      color: '#FF7043',
-    },
-    {
-      text: 'John Heart',
-      id: 3,
-      color: '#E91E63',
-    },
-    {
-      text: 'Taylor Riley',
-      id: 4,
-      color: '#E91E63',
-    },
-    {
-      text: 'Brad Farkus',
-      id: 5,
-      color: '#AB47BC',
-    },
-    {
-      text: 'Arthur Miller',
-      id: 6,
-      color: '#FFA726',
-    },
-  ];
+
+  const onCurrentDateChange = (changedDate) => {
+    const currWeekStart = new Date();
+    currWeekStart.setHours(0, 0, 0, 0);
+    currWeekStart.setDate(currWeekStart.getDate() - currWeekStart.getDay());
+    if (changedDate >= currWeekStart) setCurrentDate(changedDate);
+  };
+
+  const onCurrentViewNameChange = (changedViewName) => {
+    setCurrentViewName(changedViewName);
+  };
 
   const resources = [
     {
-      fieldName: 'ownerId',
-      title: 'Owners',
-      instances: owners,
+      fieldName: 'instructorId',
+      title: 'Instructors',
+      instances: instructors || [],
     },
   ];
 
@@ -91,8 +78,12 @@ export default function ClassSchedule() {
     <Paper>
       <Scheduler data={classes} height={1000}>
         <ViewState
-          defaultCurrentDate={currentDate}
+          // defaultCurrentDate={currentDate}
+          currentDate={currentDate}
           defaultCurrentViewName="Week"
+          currentViewName={currentViewName}
+          onCurrentDateChange={onCurrentDateChange}
+          onCurrentViewNameChange={onCurrentViewNameChange}
         />
         <DayView startDayHour={9} endDayHour={18} />
         <WeekView startDayHour={10} endDayHour={19} />
@@ -102,6 +93,7 @@ export default function ClassSchedule() {
         <TodayButton />
         <ViewSwitcher />
         <EditingState onCommitChanges={commitChanges} />
+        <IntegratedEditing />
         <Appointments />
         <Resources data={resources} />
         <AppointmentTooltip
