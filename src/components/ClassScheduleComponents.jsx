@@ -3,18 +3,26 @@ import {
   Appointments,
   AppointmentTooltip,
 } from '@devexpress/dx-react-scheduler-material-ui';
-import { Button, Grid, IconButton, TextField } from '@mui/material';
+import {
+  Button,
+  Grid,
+  IconButton,
+  styled,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { useEnroll, useUnEnroll } from '../api/queries';
 import { apiRoutes } from '../routes';
 import InfoIcon from '@mui/icons-material/Info';
+import CheckBoxTwoToneIcon from '@mui/icons-material/CheckBoxTwoTone';
 
-export const BoolEditor = (props) => {
+export const BoolEditor = props => {
   return null;
 };
 
-export const TextEditor = (props) => {
+export const TextEditor = props => {
   if (props.type === 'multilineTextEditor') {
     return null;
   }
@@ -30,28 +38,51 @@ export const DateEditor = ({ value, onValueChange }) => {
       InputLabelProps={{
         shrink: true,
       }}
-      onChange={(e) => onValueChange(new Date(e.target.value))}
+      onChange={e => onValueChange(new Date(e.target.value))}
       value={value.toISOString().slice(0, 16)}
     />
   );
 };
 
-export const Appointment = ({
-  children,
-  data,
-  toggleVisibility,
-  onAppointmentMetaChange,
-  ...restProps
-}) => (
-  <Appointments.Appointment {...restProps}>
-    <React.Fragment>
-      <IconButton size="large">
-        <InfoIcon fontSize="small" />
-      </IconButton>
+const PREFIX = 'Demo';
+
+const classes = {
+  button: `${PREFIX}-button`,
+};
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  [`&.${classes.button}`]: {
+    color: theme.palette.background.default,
+    padding: 0,
+  },
+}));
+
+export const Appointment = ({ children, data, ...restProps }) => {
+  console.log(data);
+  return (
+    <Appointments.Appointment data={data} {...restProps}>
+      <div
+        style={{
+          position: 'absolute',
+          right: '2px',
+          bottom: '-4px',
+          color: 'white',
+        }}
+      >
+        {`${data.numberParticipants}/${data.maximumParticipants}`}
+      </div>
+      {data.enrolled && (
+        <CheckBoxTwoToneIcon
+          style={{ position: 'absolute', right: '0px', color: 'white' }}
+          fontSize="medium"
+        />
+      )}
+
       {children}
-    </React.Fragment>
-  </Appointments.Appointment>
-);
+    </Appointments.Appointment>
+  );
+};
+
 export const TooltipContent = ({
   children,
   appointmentData,
@@ -97,10 +128,10 @@ export const BasicLayout = ({
   appointmentData,
   ...restProps
 }) => {
-  const onMaxParticipantsChange = (nextValue) => {
+  const onMaxParticipantsChange = nextValue => {
     onFieldChange({ maximumParticipants: parseInt(nextValue) });
   };
-  const onDescriptionChange = (nextValue) => {
+  const onDescriptionChange = nextValue => {
     onFieldChange({ description: nextValue });
   };
 

@@ -24,6 +24,7 @@ import {
   useInstructors,
   useMe,
   usePostClasses,
+  useUpdateClass,
 } from '../api/queries';
 import {
   BasicLayout,
@@ -46,42 +47,36 @@ export default function ClassSchedule() {
   const { data: classes } = useClasses();
   const { data: instructors } = useInstructors();
   const { data: user } = useMe();
-  const mutation = usePostClasses();
-  const commitChanges = (args) => {
-    console.log('abc');
-    let ap = editingAppointment;
-    let a = 2;
-    // mutation.mutate({
-    //   name: added.title,
-    //   startDate: added.startDate,
-    //   endDate: added.endDate,
-    //   maximumParticipants: added.maximumParticipants,
-    //   placeId: 1,
-    // });
+  const classMutation = useUpdateClass();
+  const commitChanges = args => {
+    classMutation.mutate({
+      id: editingAppointment.id,
+      ...args.changed[editingAppointment.id],
+    });
   };
 
-  const onCurrentDateChange = (changedDate) => {
+  const onCurrentDateChange = changedDate => {
     const viewStart = new Date();
     viewStart.setHours(0, 0, 0, 0);
     viewStart.setDate(viewStart.getDate() - viewStart.getDay());
     if (changedDate >= viewStart) setCurrentDate(changedDate);
   };
 
-  const onCurrentViewNameChange = (changedViewName) => {
+  const onCurrentViewNameChange = changedViewName => {
     setCurrentViewName(changedViewName);
   };
 
   const resources = [
     {
       fieldName: 'instructorId',
-      title: 'Instructors',
+      title: 'Instructor',
       instances: instructors || [],
     },
   ];
 
   return (
     <Paper>
-      <Scheduler data={classes} height={1000}>
+      <Scheduler data={classes}>
         <ViewState
           currentDate={currentDate}
           defaultCurrentViewName="Week"
@@ -90,7 +85,7 @@ export default function ClassSchedule() {
           onCurrentViewNameChange={onCurrentViewNameChange}
         />
         <DayView startDayHour={9} endDayHour={18} />
-        <WeekView startDayHour={10} endDayHour={19} />
+        <WeekView startDayHour={10} endDayHour={19} cellDuration={20} />
         <MonthView />
         <Toolbar />
         <DateNavigator />
@@ -98,7 +93,7 @@ export default function ClassSchedule() {
         <ViewSwitcher />
         <EditingState
           onCommitChanges={commitChanges}
-          onEditingAppointmentChange={(appointment) =>
+          onEditingAppointmentChange={appointment =>
             setEditingAppointment(appointment)
           }
         />
@@ -106,15 +101,15 @@ export default function ClassSchedule() {
         <Appointments appointmentComponent={Appointment} />
         <Resources data={resources} />
         <AppointmentTooltip
-          onVisibilityChange={(visible) => setIsToolTipVisible(visible)}
+          onVisibilityChange={visible => setIsToolTipVisible(visible)}
           visible={isTooltipVisible}
           showCloseButton
           showOpenButton
-          contentComponent={(props) => (
+          contentComponent={props => (
             <TooltipContent toggleVisibility={setIsToolTipVisible} {...props} />
           )}
         />
-        {user && user.roles.some((role) => role.value === 'ADMIN') && (
+        {user && user.roles.some(role => role.value === 'ADMIN') && (
           <AppointmentForm
             basicLayoutComponent={BasicLayout}
             booleanEditorComponent={BoolEditor}

@@ -20,8 +20,8 @@ export const useMe = () => {
 
 export const useClasses = () => {
   return useFetch(apiRoutes.classes, undefined, {
-    select: (res) =>
-      res.map((item) => ({
+    select: res =>
+      res.map(item => ({
         ...item,
         title: item.name,
         startDate: new Date(item.startDate),
@@ -32,18 +32,27 @@ export const useClasses = () => {
 
 export const useInstructors = () => {
   return useFetch(apiRoutes.instructors, undefined, {
-    select: (res) =>
-      res.map((instructor) => ({
+    select: res =>
+      res.map(instructor => ({
         id: instructor.id,
         text: `${instructor.name}  ${instructor.surname}`,
-        color: getRandomColor(),
+        // color: getRandomColor(),
       })),
   });
 };
 
 export const usePostClasses = () => {
   const queryClient = useQueryClient();
-  return useMutation((data) => api.post(apiRoutes.classes, data), {
+  return useMutation(data => api.post(apiRoutes.classes, data), {
+    onSuccess: () => {
+      queryClient.invalidateQueries([apiRoutes.classes]);
+    },
+  });
+};
+
+export const useUpdateClass = () => {
+  const queryClient = useQueryClient();
+  return useMutation(data => api.patch(apiRoutes.classes, data), {
     onSuccess: () => {
       queryClient.invalidateQueries([apiRoutes.classes]);
     },
@@ -52,10 +61,10 @@ export const usePostClasses = () => {
 
 export const useEnroll = () => {
   const queryClient = useQueryClient();
-  return useMutation((data) => api.post(`${apiRoutes.enroll + data.id}`));
+  return useMutation(data => api.post(`${apiRoutes.enroll + data.id}`));
 };
 
 export const useUnEnroll = () => {
   const queryClient = useQueryClient();
-  return useMutation((data) => api.delete(`${apiRoutes.enroll + data.id}`));
+  return useMutation(data => api.delete(`${apiRoutes.enroll + data.id}`));
 };
