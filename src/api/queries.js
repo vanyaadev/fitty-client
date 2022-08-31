@@ -52,9 +52,10 @@ export const usePostClasses = () => {
 
 export const useEnroll = () => {
   const queryClient = useQueryClient();
-  return useMutation((data) => api.post(`${apiRoutes.enroll + data.userId}`), {
-    onSuccess: () => {
-      queryClient.invalidateQueries([apiRoutes.enroll]);
-    },
-  });
+  return useMutation((data) => api.post(`${apiRoutes.enroll + data.id}`));
+};
+
+export const useUnEnroll = () => {
+  const queryClient = useQueryClient();
+  return useMutation((data) => api.delete(`${apiRoutes.enroll + data.id}`));
 };

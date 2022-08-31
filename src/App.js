@@ -19,6 +19,7 @@ function App() {
               exact
             />
           </Route>
+
           <Route path={pageRoutes.auth} element={<Auth />} exact />
           <Route path="*" element={<div>Not found</div>} />
         </Routes>

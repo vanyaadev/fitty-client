@@ -1,33 +1,14 @@
 import {
   AppointmentForm,
+  Appointments,
   AppointmentTooltip,
 } from '@devexpress/dx-react-scheduler-material-ui';
-import { Autocomplete, Button, Grid, TextField } from '@mui/material';
-import { useEnroll } from '../api/queries';
-
-export const Content = ({ children, appointmentData, ...restProps }) => {
-  const enroll = useEnroll();
-  const onClickEnroll = (event, userId) => {
-    enroll.mutate({ userId });
-  };
-
-  return (
-    <AppointmentTooltip.Content
-      {...restProps}
-      appointmentData={appointmentData}
-    >
-      <Grid container alignItems="center" justifyContent="center">
-        <Button
-          variant="outlined"
-          color={appointmentData.enrolled ? 'error' : 'info'}
-          onClick={(event) => onClickEnroll(event, appointmentData.id)}
-        >
-          {appointmentData.enrolled ? 'Cancel' : 'Enroll'}
-        </Button>
-      </Grid>
-    </AppointmentTooltip.Content>
-  );
-};
+import { Button, Grid, IconButton, TextField } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { useEnroll, useUnEnroll } from '../api/queries';
+import { apiRoutes } from '../routes';
+import InfoIcon from '@mui/icons-material/Info';
 
 export const BoolEditor = (props) => {
   return null;
@@ -40,6 +21,77 @@ export const TextEditor = (props) => {
   return <AppointmentForm.TextEditor {...props} />;
 };
 
+export const DateEditor = ({ value, onValueChange }) => {
+  return (
+    <TextField
+      type="datetime-local"
+      // defaultValue="2017-05-24T10:30"
+      sx={{ flex: 1, marginTop: '5px' }}
+      InputLabelProps={{
+        shrink: true,
+      }}
+      onChange={(e) => onValueChange(new Date(e.target.value))}
+      value={value.toISOString().slice(0, 16)}
+    />
+  );
+};
+
+export const Appointment = ({
+  children,
+  data,
+  toggleVisibility,
+  onAppointmentMetaChange,
+  ...restProps
+}) => (
+  <Appointments.Appointment {...restProps}>
+    <React.Fragment>
+      <IconButton size="large">
+        <InfoIcon fontSize="small" />
+      </IconButton>
+      {children}
+    </React.Fragment>
+  </Appointments.Appointment>
+);
+export const TooltipContent = ({
+  children,
+  appointmentData,
+  toggleVisibility,
+  ...restProps
+}) => {
+  const enroll = useEnroll();
+  const unEnroll = useUnEnroll();
+  const queryClient = useQueryClient();
+  const onClickEnroll = () => {
+    const mutationEffect = appointmentData.enrolled ? unEnroll : enroll;
+    mutationEffect.mutate(
+      { id: appointmentData.id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries([apiRoutes.classes]);
+          toggleVisibility(false);
+        },
+      }
+    );
+  };
+
+  return (
+    <AppointmentTooltip.Content
+      {...restProps}
+      appointmentData={appointmentData}
+    >
+      <Grid container alignItems="center" justifyContent="center">
+        <Button
+          variant="outlined"
+          color={appointmentData.enrolled ? 'error' : 'info'}
+          onClick={() => onClickEnroll()}
+        >
+          {appointmentData.enrolled ? 'Cancel' : 'Enroll'}
+        </Button>
+      </Grid>
+    </AppointmentTooltip.Content>
+  );
+};
+
 export const BasicLayout = ({
   onFieldChange,
   appointmentData,
@@ -50,9 +102,6 @@ export const BasicLayout = ({
   };
   const onDescriptionChange = (nextValue) => {
     onFieldChange({ description: nextValue });
-  };
-  const onInstructorChange = (nextValue) => {
-    onFieldChange({ instructor: nextValue });
   };
 
   return (
@@ -73,13 +122,6 @@ export const BasicLayout = ({
         onValueChange={onMaxParticipantsChange}
         placeholder="Maximum participants"
         type="numberEditor"
-      />
-      <AppointmentForm.Label text="Instructor" />
-      <Autocomplete
-        disablePortal
-        options={['a', 'b', 'c']}
-        renderInput={(params) => <TextField {...params} />}
-        onChange={onInstructorChange}
       />
     </AppointmentForm.BasicLayout>
   );

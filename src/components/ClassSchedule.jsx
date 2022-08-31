@@ -28,23 +28,28 @@ import {
 import {
   BasicLayout,
   BoolEditor,
-  Content,
+  TooltipContent,
+  DateEditor,
   TextEditor,
+  Appointment,
 } from './ClassScheduleComponents';
 import { useState } from 'react';
+import { connectProps } from '@devexpress/dx-react-core';
 
 let currentDate = new Date();
 
 export default function ClassSchedule() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isTooltipVisible, setIsToolTipVisible] = useState();
   const [currentViewName, setCurrentViewName] = useState('Week');
-
+  const [editingAppointment, setEditingAppointment] = useState();
   const { data: classes } = useClasses();
   const { data: instructors } = useInstructors();
   const { data: user } = useMe();
   const mutation = usePostClasses();
-  const commitChanges = ({ added, changed, deleted }) => {
+  const commitChanges = (args) => {
     console.log('abc');
+    let ap = editingAppointment;
     let a = 2;
     // mutation.mutate({
     //   name: added.title,
@@ -78,7 +83,6 @@ export default function ClassSchedule() {
     <Paper>
       <Scheduler data={classes} height={1000}>
         <ViewState
-          // defaultCurrentDate={currentDate}
           currentDate={currentDate}
           defaultCurrentViewName="Week"
           currentViewName={currentViewName}
@@ -92,20 +96,30 @@ export default function ClassSchedule() {
         <DateNavigator />
         <TodayButton />
         <ViewSwitcher />
-        <EditingState onCommitChanges={commitChanges} />
+        <EditingState
+          onCommitChanges={commitChanges}
+          onEditingAppointmentChange={(appointment) =>
+            setEditingAppointment(appointment)
+          }
+        />
         <IntegratedEditing />
-        <Appointments />
+        <Appointments appointmentComponent={Appointment} />
         <Resources data={resources} />
         <AppointmentTooltip
+          onVisibilityChange={(visible) => setIsToolTipVisible(visible)}
+          visible={isTooltipVisible}
           showCloseButton
           showOpenButton
-          contentComponent={Content}
+          contentComponent={(props) => (
+            <TooltipContent toggleVisibility={setIsToolTipVisible} {...props} />
+          )}
         />
         {user && user.roles.some((role) => role.value === 'ADMIN') && (
           <AppointmentForm
             basicLayoutComponent={BasicLayout}
             booleanEditorComponent={BoolEditor}
             textEditorComponent={TextEditor}
+            dateEditorComponent={DateEditor}
           />
         )}
       </Scheduler>
